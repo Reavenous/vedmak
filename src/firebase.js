@@ -15,13 +15,25 @@ import { getAuth }        from "firebase/auth";
 import { getFirestore }   from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey:            "TVOJE_API_KEY",
-  authDomain:        "TVUJ_PROJEKT.firebaseapp.com",
-  projectId:         "TVUJ_PROJEKT",
-  storageBucket:     "TVUJ_PROJEKT.appspot.com",
-  messagingSenderId: "TVOJE_SENDER_ID",
-  appId:             "TVOJE_APP_ID",
+
+  apiKey: "AIzaSyCmZtVUzMcF0cXsOtmpNlFugWcXceYk9XY",
+
+  authDomain: "vedmak-eeff.firebaseapp.com",
+
+  databaseURL: "https://vedmak-eeff-default-rtdb.europe-west1.firebasedatabase.app",
+
+  projectId: "vedmak-eeff",
+
+  storageBucket: "vedmak-eeff.firebasestorage.app",
+
+  messagingSenderId: "281135497000",
+
+  appId: "1:281135497000:web:be1448859538bba5361a1d",
+
+  measurementId: "G-866NPGC66W"
+
 };
+
 
 const app = initializeApp(firebaseConfig);
 

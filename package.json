@@ -1,14 +1,17 @@
 {
-  "name": "vedmak",
-  "version": "0.0.0",
-  "private": true,
+  "name": "vedmak-pogromca-leszych",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "vite build && firebase deploy"
+  },
+  "dependencies": {
+    "firebase": "^10.12.0"
   },
   "devDependencies": {
-    "vite": "^8.0.0"
+    "vite": "^5.4.0"
   }
 }

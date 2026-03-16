@@ -1,13 +1,268 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vedmak</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vědmák: Pogromca Leszych</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blood:    #8a0303;
+      --blood-dk: #5a0202;
+      --blood-lt: #b52828;
+      --silver:   #c0c0c0;
+      --silver-dk:#888;
+      --dark:     #1a1a1a;
+      --darker:   #0f0f0f;
+      --parchment:#2b2218;
+      --parch-lt: #3a2e1e;
+      --text:     #d4c5a9;
+      --text-dim: #8a7a65;
+      --glow:     rgba(138,3,3,.35);
+    }
+
+    body {
+      background: var(--darker);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Crimson Pro', serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ── Pozadí ── */
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%,   #2a0606 0%, transparent 65%),
+        radial-gradient(ellipse 60% 80% at 100% 100%, #1a0404 0%, transparent 55%),
+        #0f0f0f;
+    }
+    #blood-bg {
+      position: fixed; inset: 0; z-index: 1; overflow: hidden;
+    }
+    .blood-drop {
+      position: absolute;
+      background: linear-gradient(to bottom, #8a0303, transparent);
+      border-radius: 0 0 50% 50%;
+      animation: drip 8s ease-in infinite;
+    }
+    @keyframes drip {
+      0%   { transform: translateY(-20px); opacity: .15; }
+      80%  { opacity: .2; }
+      100% { transform: translateY(120vh); opacity: 0; }
+    }
+
+    /* ── Hlavní karta ── */
+    .login-wrap {
+      position: relative; z-index: 10;
+      width: 440px; max-width: calc(100vw - 24px);
+      padding: 44px 40px 36px;
+      background: var(--parchment);
+      border: 1px solid rgba(138,3,3,.4);
+      border-radius: 4px;
+      box-shadow: 0 0 60px rgba(138,3,3,.2), inset 0 0 80px rgba(0,0,0,.4);
+      animation: cardIn .6s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(28px) scale(.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Logo ── */
+    .logo { text-align: center; margin-bottom: 32px; }
+    .logo-rune {
+      font-size: 52px; display: block; margin-bottom: 8px;
+      filter: drop-shadow(0 0 12px rgba(138,3,3,.8));
+      animation: rune-pulse 3s ease-in-out infinite;
+    }
+    @keyframes rune-pulse {
+      0%,100% { filter: drop-shadow(0 0 8px rgba(138,3,3,.6)); }
+      50%      { filter: drop-shadow(0 0 22px rgba(200,30,30,.9)); }
+    }
+    .logo h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 20px; font-weight: 700;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--silver);
+      text-shadow: 0 0 16px rgba(192,192,192,.25);
+    }
+    .logo p {
+      font-size: 11px; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--blood-lt); margin-top: 4px; opacity: .75;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; background: rgba(0,0,0,.3);
+      border-radius: 3px; padding: 3px; margin-bottom: 26px;
+      border: 1px solid rgba(138,3,3,.2);
+    }
+    .tab-btn {
+      flex: 1; padding: 9px; border: none; background: transparent;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--text-dim); border-radius: 2px;
+      transition: all .2s;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #8a0303, #5a0202);
+      color: var(--silver);
+      box-shadow: 0 2px 12px rgba(138,3,3,.45);
+    }
+
+    /* ── Formuláře ── */
+    .form { display: none; }
+    .form.active { display: block; }
+
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 11px; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;
+    }
+    .field input, .field select {
+      width: 100%; padding: 10px 14px;
+      background: rgba(0,0,0,.35); color: var(--text);
+      border: 1px solid rgba(138,3,3,.3); border-radius: 3px;
+      font-family: 'Crimson Pro', serif; font-size: 15px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input:focus, .field select:focus {
+      outline: none; border-color: var(--blood-lt);
+      box-shadow: 0 0 0 3px rgba(138,3,3,.2);
+    }
+    .field select option { background: #1a1a1a; }
+
+    /* ── Tlačítko ── */
+    .btn-main {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #8a0303, #6a0202);
+      color: var(--silver); border: none; border-radius: 3px;
+      font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      cursor: pointer; margin-top: 6px;
+      transition: all .2s; position: relative; overflow: hidden;
+    }
+    .btn-main::before {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 30%, rgba(192,192,192,.08));
+      opacity: 0; transition: opacity .2s;
+    }
+    .btn-main:hover::before { opacity: 1; }
+    .btn-main:hover { box-shadow: 0 4px 20px rgba(138,3,3,.5); transform: translateY(-1px); }
+    .btn-main:active { transform: translateY(0); }
+    .btn-main:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Status ── */
+    .status { min-height: 22px; font-size: 13px; margin-top: 12px; text-align: center; }
+    .status.error   { color: #f08080; }
+    .status.success { color: #80c880; }
+
+    /* ── Přepínač jazyka ── */
+    .lang-row {
+      display: flex; gap: 6px; justify-content: center;
+      margin-top: 20px; padding-top: 16px;
+      border-top: 1px solid rgba(138,3,3,.15);
+    }
+    .lang-btn {
+      background: none; border: 1px solid rgba(138,3,3,.2);
+      border-radius: 3px; padding: 3px 7px; font-size: 15px;
+      cursor: pointer; opacity: .55; transition: all .15s;
+    }
+    .lang-btn:hover, .lang-btn.active { opacity: 1; border-color: var(--blood-lt); }
+
+    .spinner-inline {
+      display: inline-block; width: 12px; height: 12px;
+      border: 2px solid rgba(192,192,192,.3); border-top-color: var(--silver);
+      border-radius: 50%; animation: spin .6s linear infinite;
+      vertical-align: middle; margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Dekorativní linka ── */
+    .divider {
+      text-align: center; font-size: 18px; color: var(--blood);
+      letter-spacing: .3em; margin: 4px 0 20px; opacity: .5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div id="blood-bg"></div>
+
+<div class="login-wrap">
+  <div class="logo">
+    <span class="logo-rune">🐺</span>
+    <h1>Vědmák</h1>
+    <p>Pogromca Leszych</p>
+  </div>
+
+  <div class="divider">⸺ ✦ ⸺</div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('login')" data-i18n="tab_login">Přihlášení</button>
+    <button class="tab-btn"        onclick="switchTab('register')" data-i18n="tab_register">Registrace</button>
+  </div>
+
+  <!-- PŘIHLÁŠENÍ -->
+  <div id="form-login" class="form active">
+    <div class="field">
+      <label data-i18n="email">Email</label>
+      <input id="login-email" type="email" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label data-i18n="password">Heslo</label>
+      <input id="login-password" type="password" autocomplete="current-password" />
+    </div>
+    <button class="btn-main" id="btn-login" onclick="handleLogin()" data-i18n="btn_login">Vstoupit</button>
+    <div id="login-status" class="status"></div>
+  </div>
+
+  <!-- REGISTRACE -->
+  <div id="form-register" class="form">
+    <div class="field">
+      <label data-i18n="witcher_name">Jméno Zaklínače</label>
+      <input id="register-name" type="text" maxlength="40" />
+    </div>
+    <div class="field">
+      <label data-i18n="choose_school">Zaklínačská škola</label>
+      <select id="register-school">
+        <option value="vlk"    data-i18n="school_vlk">Škola Vlka</option>
+        <option value="medved" data-i18n="school_medved">Škola Medvěda</option>
+        <option value="zmije"  data-i18n="school_zmije">Škola Zmije</option>
+      </select>
+    </div>
+    <div class="field">
+      <label data-i18n="email">Email</label>
+      <input id="register-email" type="email" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label data-i18n="password">Heslo</label>
+      <input id="register-password" type="password" autocomplete="new-password" />
+    </div>
+    <button class="btn-main" id="btn-register" onclick="handleRegister()" data-i18n="btn_register">Stát se Zaklínačem</button>
+    <div id="register-status" class="status"></div>
+  </div>
+
+  <!-- JAZYK -->
+  <div class="lang-row" id="lang-row">
+    <button class="lang-btn" data-lang="cs"  onclick="window.switchLang('cs')"  title="Čeština">🇨🇿</button>
+    <button class="lang-btn" data-lang="en"  onclick="window.switchLang('en')"  title="English">🇬🇧</button>
+    <button class="lang-btn" data-lang="fr"  onclick="window.switchLang('fr')"  title="Français">🇫🇷</button>
+    <button class="lang-btn" data-lang="es"  onclick="window.switchLang('es')"  title="Español">🇪🇸</button>
+    <button class="lang-btn" data-lang="de"  onclick="window.switchLang('de')"  title="Deutsch">🇩🇪</button>
+    <button class="lang-btn" data-lang="pl"  onclick="window.switchLang('pl')"  title="Polski">🇵🇱</button>
+    <button class="lang-btn" data-lang="nl"  onclick="window.switchLang('nl')"  title="Nederlands">🇳🇱</button>
+  </div>
+</div>
+
+<script type="module" src="/src/auth.js"></script>
+</body>
 </html>
